@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Online Code Compiler</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        --primary: #2563eb;
+        --background: #181c24;
+        --surface: #232837;
+        --text: #f3f4f6;
+        --editor-bg: #1e2330;
+        --border: #334155;
+        --button-bg: #2563eb;
+        --button-text: #fff;
+        --button-hover: #1d4ed8;
+        --reset-bg: #334155;
+        --reset-text: #f3f4f6;
+        --reset-hover: #475569;
+        --output-bg: #181c24;
+        --label: #60a5fa;
+      }
+      body.light {
+        --primary: #2563eb;
+        --background: #f0f4f8;
+        --surface: #fff;
+        --text: #222;
+        --editor-bg: #f8fafc;
+        --border: #e5e7eb;
+        --button-bg: #2563eb;
+        --button-text: #fff;
+        --button-hover: #1d4ed8;
+        --reset-bg: #e5e7eb;
+        --reset-text: #222;
+        --reset-hover: #cbd5e1;
+        --output-bg: #fff;
+        --label: #2563eb;
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: var(--background);
+        color: var(--text);
+        min-height: 100vh;
+        box-sizing: border-box;
+        transition: background 0.2s, color 0.2s;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.2rem 2vw 0.2rem 2vw;
+      }
+      .app-title {
+        padding-left: 38.5%;
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--primary);
+        letter-spacing: 1px;
+        user-select: none;
+      }
+      .theme-btn {
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 25px;
+        padding: 0.5rem 1.2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-left: 0.5rem;
+        transition: background 0.18s, color 0.18s;
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+      }
+      .theme-btn:hover {
+        background: var(--editor-bg);
+      }
+      .container {
+        display: flex;
+        height: 82vh;
+        margin: 2vh 2vw 0 2vw;
+        gap: 2vw;
+      }
+      .editor-section,
+      .output-section {
+        flex: 1 1 0;
+        background: var(--surface);
+        border-radius: 12px;
+        box-shadow: 0 4px 24px #0002;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        transition: background 0.2s;
+      }
+      .editor-label,
+      .output-label {
+        font-weight: bold;
+        color: var(--label);
+        padding: 1rem 1rem 0.5rem 1rem;
+        letter-spacing: 0.5px;
+      }
+      textarea {
+        flex: 1 1 0;
+        width: 100%;
+        min-height: 300px;
+        resize: none;
+        border: none;
+        outline: none;
+        padding: 1rem;
+        font-size: 1rem;
+        font-family: "Fira Mono", "Consolas", monospace;
+        background: var(--editor-bg);
+        color: var(--text);
+        border-radius: 0 0 12px 12px;
+        box-sizing: border-box;
+        transition: background 0.2s, color 0.2s;
+      }
+      .button-row {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.7rem;
+        padding: 1rem;
+        background: var(--editor-bg);
+        border-radius: 0 0 12px 12px;
+        border-top: 1px solid var(--border);
+      }
+      button {
+        padding: 0.5rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.18s, color 0.18s;
+      }
+      .run-btn {
+        background: var(--button-bg);
+        color: var(--button-text);
+      }
+      .run-btn:hover {
+        background: var(--button-hover);
+      }
+      .reset-btn {
+        background: var(--reset-bg);
+        color: var(--reset-text);
+      }
+      .reset-btn:hover {
+        background: var(--reset-hover);
+      }
+      .output-frame {
+        flex: 1 1 0;
+        width: 100%;
+        min-height: 300px;
+        background: var(--output-bg);
+        border: none;
+        border-radius: 0 0 12px 12px;
+        box-sizing: border-box;
+        transition: background 0.2s;
+      }
+      .footer {
+        text-align: center;
+        color: var(--label);
+        font-size: 0.95rem;
+        margin: 1.5em 0 0.5em 0;
+        opacity: 0.8;
+      }
+      @media (max-width: 900px) {
+        .container {
+          flex-direction: column;
+          height: auto;
+          gap: 1.5vh;
+        }
+        .editor-section,
+        .output-section {
+          min-height: 200px;
+        }
+        .header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 1em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header with Title and Theme Button -->
+    <div class="header">
+      <div class="app-title">Online Code Compiler</div>
+      <button id="themeBtn" class="theme-btn" title="Toggle light/dark theme">
+        <span id="themeIcon" aria-hidden="true">🌙</span>
+        <span id="themeText">Dark</span>
+      </button>
+    </div>
+    <!-- Split Screen -->
+    <div class="container">
+      <!-- Editor -->
+      <div class="editor-section">
+        <div class="editor-label">Code Editor (HTML, CSS, JS)</div>
+        <textarea
+          id="code"
+          placeholder="Write your HTML, CSS, and JavaScript code here..."
+        >
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sample</title>
+    <style>
+      body { font-family: sans-serif; background: #181c24; color: #f3f4f6; }
+      h2 { color: #60a5fa; }
+    </style>
+  </head>
+  <body>
+    <h2>Hello, World!</h2>
+    <p>This is a sample HTML file.</p>
+    <button onclick="alert('Hello from JS!')">Click Me</button>
+    <script>
+      // You can write JS here!
+      console.log('JS is running.');
+    </script>
+  </body>
+</html>
+      </textarea
+        >
+        <div class="button-row">
+          <button class="run-btn" id="runBtn">Run</button>
+          <button class="reset-btn" id="resetBtn">Reset</button>
+        </div>
+      </div>
+      <!-- Output -->
+      <div class="output-section">
+        <div class="output-label">Output</div>
+        <iframe
+          id="output"
+          class="output-frame"
+          sandbox="allow-scripts allow-same-origin"
+        ></iframe>
+      </div>
+    </div>
+    <div class="footer">
+      Made with HTML, CSS &amp; Vanilla JS |
+      <a
+        href="https://github.com/saurabhkhandare"
+        target="_blank"
+        rel="noopener"
+        ><b>Saurabh Khandare</b></a
+      >
+    </div>
+    <script>
+      // DOM elements
+      const codeTextarea = document.getElementById("code");
+      const runBtn = document.getElementById("runBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const outputFrame = document.getElementById("output");
+      const themeBtn = document.getElementById("themeBtn");
+      const themeIcon = document.getElementById("themeIcon");
+      const themeText = document.getElementById("themeText");
+
+      // Store the default code to restore on reset
+      const defaultCode = codeTextarea.value.trim();
+
+      // Theme state
+      function setTheme(dark) {
+        if (dark) {
+          document.body.classList.remove("light");
+          themeIcon.textContent = "🌙";
+          themeText.textContent = "Dark";
+          themeBtn.title = "Switch to light theme";
+        } else {
+          document.body.classList.add("light");
+          themeIcon.textContent = "☀️";
+          themeText.textContent = "Light";
+          themeBtn.title = "Switch to dark theme";
+        }
+      }
+
+      // Detect theme from localStorage or default to dark
+      let isDark = true;
+      if (localStorage.getItem("theme") === "light") isDark = false;
+      setTheme(isDark);
+
+      // Theme button click handler
+      themeBtn.addEventListener("click", () => {
+        isDark = !isDark;
+        setTheme(isDark);
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+        runCode(); // Update output window theme on toggle
+      });
+
+      // Helper: inject theme CSS into user code
+      function injectThemeStyles(userCode, darkTheme) {
+        // Theme CSS for output window
+        const darkCSS = `
+        body {
+          background: #181c24 !important;
+          color: #f3f4f6 !important;
+        }
+      `;
+        const lightCSS = `
+        body {
+          background: #fff !important;
+          color: #222 !important;
+        }
+      `;
+        const themeCSS = `<style id="__theme-inject">${
+          darkTheme ? darkCSS : lightCSS
+        }</style>`;
+
+        // Try to inject into <head> if present, else at top
+        let code = userCode.trim();
+        if (/<head[^>]*>/i.test(code)) {
+          // Insert after <head>
+          code = code.replace(/<head([^>]*)>/i, `<head$1>\n${themeCSS}`);
+        } else if (/<html[^>]*>/i.test(code)) {
+          // Insert after <html> if head is missing
+          code = code.replace(
+            /<html([^>]*)>/i,
+            `<html$1>\n<head>${themeCSS}</head>`
+          );
+        } else {
+          // No html/head, just prepend
+          code = `${themeCSS}\n${code}`;
+        }
+        return code;
+      }
+
+      // Function to render code in the output iframe
+      function runCode() {
+        let userCode = codeTextarea.value;
+        // Always inject theme CSS
+        const themedCode = injectThemeStyles(
+          userCode,
+          !document.body.classList.contains("light")
+        );
+        outputFrame.srcdoc = themedCode;
+      }
+
+      // Function to reset the editor and output
+      function resetCode() {
+        codeTextarea.value = "";
+        outputFrame.srcdoc = "";
+      }
+
+      // Run code on button click
+      runBtn.addEventListener("click", runCode);
+
+      // Reset code on button click
+      resetBtn.addEventListener("click", resetCode);
+
+      // Initial render
+      runCode();
+    </script>
+  </body>
+</html>
