@@ -20,7 +20,7 @@ A simple, modern, and responsive online code compiler for HTML, CSS, and JavaScr
 
 1. **Download or Clone the Repository**
 
-git clone [git@github.com:saurabhkhandare/v1-compiler.git](https://github.com/saurabhkhandare/v1-compiler.git)
+git clone https://github.com/saurabhkhandare/v1-compiler.git
 
 2. **Open `index.html` in your web browser.**
 
